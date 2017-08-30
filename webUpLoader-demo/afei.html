@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        *{margin:0;padding:0;}
+        .main{width:600px; height:420px; margin:100px auto;}
+        li{width:58px; height:58px; list-style-type:none; float:left; background:url(images/afei.jpg);border:1px solid rgba(0,0,0,0);
+            transform-style:preserve-3d;
+            opacity:1;}
+    </style>
+</head>
+<body>
+<div class="main">
+     <ul>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+         <li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+     </ul>
+</div>
+
+<script type="text/javascript" src="../js/jquery-1.9.1.min.js"></script>
+<script>
+
+    var aa=29988+'';
+    var arr=aa.substr(2,1);
+    console.log(arr);
+
+    $.fn.extend({
+        EQ:function(x,y,total){
+             return $(this).eq(total*y+x);
+        }
+    });
+
+    var len=$("li").length;
+    var ix=$(".main").outerWidth()/$("li").outerWidth();
+    var iy=$(".main").outerHeight()/$("li").outerHeight();
+    var x;
+    var y;
+    //alert(iy);
+
+    for(var i=0;i<70;i++){
+        x=i%ix;
+        y=Math.floor(i/ix);
+        $("li").EQ(x,y,ix).append(x+"."+y)
+        $("li").EQ(x,y,ix).css({"background-position":-58*x+'px '+-58*y+'px'})
+
+
+    }
+    var index=0;
+    setInterval(function(){
+
+        $("li").eq(index).css({
+            'transition':'2s transform',
+            'transform':'rotateZ(1080deg)',
+            'border':'1px solid rgba(0,0,0,1)',
+
+
+        });
+        index++;
+    },20)
+
+
+
+
+
+</script>
+</body>
+</html>

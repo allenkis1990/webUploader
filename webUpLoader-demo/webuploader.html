@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="css/webuploader.css">
+</head>
+<body>
+
+
+<div id="uploader" class="wu-example">
+    <!--用来存放文件信息-->
+    <div id="thelist" class="uploader-list"></div>
+    <div class="btns">
+        <div id="picker">选择文件</div>
+        <button id="ctlBtn" class="btn btn-default">开始上传</button>
+        <div style="width:200px;height:20px;border:1px solid red;position:relative">
+            <div class="lwh-progress" style="height:100%;position:absolute;top:0;left:0;background:blue"></div>
+        </div>
+    </div>
+</div>
+<div id="imgBox"><img src="" width="300" height="300" /></div>
+
+<script type="text/javascript" src="js/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="js/webuploader.js"></script>
+<script>
+    //new WebUploader.Uploader
+
+    //console.log(WebUploader.Base.guid());
+    var md5Object = new WebUploader.Runtime.Html5.Md5({});
+    WebUploader.Uploader.register(
+            {
+                'before-send-file': 'beforeSendFile',
+                'before-send': 'beforeSend'
+            }, {
+                beforeSendFile: function (file) {// 在文件开始发送前进行MD5校验异步操作。是否可以秒传钩子要在create之前注册
+                    var task = $.Deferred();
+                    console.log(md5Object.md5String);
+                    //file.guid = WebUploader.Base.guid();
+                    //console.log(md5Object);
+                    // 如果文件大小不超过10M的直接不执行md5或者断点续传，或者分片上传
+                    console.log(file);
+                    file.md5 = md5Object.md5String([file.lastModifiedDate.getTime(), file.name, file.size].join('-'));
+                    alert('lwh');
+
+
+                    if(file.name==='afei.jpg'){
+
+
+                        uploader.trigger("uploadProgress", file, 1);
+                        uploader.trigger("uploadComplete", file);//触发已上传事件
+                        uploader.trigger("uploadSuccess", file, {});//触发上传成功事件
+                        uploader.trigger("uploadFinished", file);//触发上传完成事件
+
+
+                        uploader.skipFile(file);
+                        task.reject();
+                    }else{
+                        task.resolve();
+                    }
+                    return $.when(task);
+                },
+                beforeSend: function (block) {//分片文件发送之前计算分片文件的MD5,并且验证该分片是否需要上传
+                    var task = $.Deferred();
+                    task.resolve();
+                    return $.when(task);
+                }
+            });
+
+
+    var uploader = WebUploader.create({
+
+        // swf文件路径
+        swf: 'js/Uploader.swf',
+
+        // 文件接收服务端。
+        server: 'afei.html',
+
+        // 选择文件的按钮。可选。
+        // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+        pick: '#picker',
+
+        chunked:true,
+        chunkSize:199999,
+        auto:true,
+        chunkRetry:0,
+        // 不压缩image, 默认如果是jpeg，文件上传前会压缩一把再上传！
+        resize: false,
+        accept: {
+            title: 'files',
+            extensions: 'jpg,png'
+            //mimeTypes: 'image/*'
+        }
+    });
+
+    //var md5Object = new WebUploader.Runtime.Html5.Md5({});
+    console.log(WebUploader);
+
+
+
+    console.log(WebUploader);
+
+    uploader.on('uploadBeforeSend', function (object, data, headers) {
+        alert('1121212');
+        console.log(object);
+        //if ((HB_WebUploaderService.checkIsBigFile(object.file.size) || checkIsBigStandard()) && !HB_WebUploaderService.isIe()) {
+            var chunks = object.chunks,
+                    chunk = object.chunk;
+            //HB_WebUploaderService.doSpecialLog('当前分片数' + object.chunks, 'pink');
+            //data.guid = object.file.guid;//整个文件guid
+            //data.md5 = object.file.md5;//整个文件的md5
+            //data.originalFileName = object.file.name;//原文件名
+
+            if (chunks > 1) {//有分片的时候要把分片数以及当前分片号,以及分片的md5和当前分片的大小传上去
+                data.chunks = chunks;//分片数
+                data.chunk = chunk;//当前分片号
+                data.chunkMd5 = object.file.chunkMd5;//分片文件的md5
+                data.chunkSize = object.blob.size;//分片文件大小
+            }
+        //}
+    });
+
+
+
+    var $list=$(".uploader-list");
+
+    uploader.on( 'fileQueued', function( file ) {
+        file.md5='aaa-121212-xxxx';
+        //console.log(file);
+        $('.lwh-progress').css({width:0});
+        /*$list.append( '<div id="' + file.id + '" class="item">' +
+        '<h4 class="info">' + file.name + '</h4>' +
+        '<p class="state">等待上传...</p>' +
+        '</div>' );*/
+        //console.log(file);
+        var $img=$('#imgBox img');
+        uploader.makeThumb( file, function( error, src ) {
+            console.log(error);
+            if ( error ) {
+                alert('不能预览');
+                return;
+            }
+
+            $img.attr( 'src', src );
+        }, 1, 1 );
+
+
+    });
+    //console.log(uploader);
+
+    //console.log(md5Object);
+    uploader.on('beforeFileQueued', function (file) {
+        /*if(file.name==='afei.jpg'){
+            return false;
+        }*/
+
+        console.log(66);
+        console.log(file);
+    });
+
+
+    uploader.on( 'uploadProgress', function( file, percentage ) {
+        //console.log(percentage);
+        $('.lwh-progress').css({width:percentage*100+'%'});
+    });
+
+    uploader.on('uploadSuccess',function(file){
+        alert(1);
+        uploader.reset();//清空文件队列
+    });
+
+    $('#ctlBtn').click(function(){
+        uploader.upload();
+        var len=uploader.getFiles();
+        console.log(len);
+    });
+</script>
+
+</body>
+</html>
